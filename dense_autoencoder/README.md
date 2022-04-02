@@ -1,4 +1,4 @@
-## Dense-Autoencoder
+# Dense-Autoencoder
 Autoencoder with Dense layers for anomaly detection.
 
 ### Installation

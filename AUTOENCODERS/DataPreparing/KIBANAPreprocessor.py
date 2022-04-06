@@ -7,11 +7,13 @@ import tqdm
 class KIBANAPreprocessor:
     def __init__(self):
         self.columns_to_keep = ['type', 'method',
-                                'statusCode', 'message', 'req.url']
+                                'statusCode']  # , 'message', 'req.url']
         self.categorical_columns = ['type', 'method', 'statusCode']
 
     def preprocess_train_data(self, df: pd.DataFrame):
         df = df.filter(self.columns_to_keep)
+        df = df.astype({col: str for col in self.categorical_columns})
+
         self.train_categorical_unique = {col: np.array(sorted(
             df[col].unique())) for col in self.categorical_columns}
 
@@ -37,6 +39,8 @@ class KIBANAPreprocessor:
 
     def preprocess_test_data(self, df: pd.DataFrame):
         df = df.filter(self.columns_to_keep)
+        df = df.astype({col: str for col in self.categorical_columns})
+
         for (col, encoder) in self.onehotencoders.items():
             encoded_columns = [
                 f'{col}_{c}' for c in self.train_categorical_unique[col]]

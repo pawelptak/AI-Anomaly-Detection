@@ -3,13 +3,13 @@ from settings import *
 
 def multiline_logs_processing(fpath):
     bracket_start = False
-    brackets = []
     bracket_log = ""
     outlines = []
     with open(fpath) as f:
+        print(f'Processing {fpath}')
         lines = f.readlines()
         for line in lines:
-            if not line.startswith('{') and not bracket_start and ' => ' not in line:
+            if any(c.isalpha() for c in line) and not bracket_start and len(line) > 2 and ' => ' not in line:
                 outlines.append(line)
 
             if line.startswith('{'):
@@ -20,18 +20,17 @@ def multiline_logs_processing(fpath):
             if line.startswith('}'):
                 bracket_start = False
                 bracket_log += line
-                outlines.append(bracket_log)
+                if len(bracket_log) > 2:
+                    outlines.append(bracket_log)
                 bracket_log = ""
                 continue
 
             if bracket_start:
                 bracket_log += line.strip()
 
-    print(brackets)
     out_name = os.path.splitext(os.path.basename(fpath))[0]
-    with open(os.path.join(LOGS_CSV_OUTPUT_DIR, 'pies.txt'), "w") as f:
+    with open(os.path.join(LOGS_CSV_OUTPUT_DIR, f'{out_name}.txt'), "w") as f:
         f.writelines(outlines)
-            #print(bracket_log)
 
 
 if __name__ == '__main__':
@@ -39,4 +38,3 @@ if __name__ == '__main__':
         if fname.endswith('log'):
             fpath = os.path.join(LOGS_INPUT_DIR, fname)
             multiline_logs_processing(fpath)
-            break

@@ -9,22 +9,27 @@ from collections import Counter
 from PIL import Image
 
 
-def collect_event_ids(data_frame, regex_pattern, column_names):
+def prepare_dataframe(data_frame, regex_pattern):
     """
     turns input data_frame into a 2 columned dataframe
     with columns: BlockId, EventSequence
     where EventSequence is a list of the events that happened to the block
     """
-    data_dict = OrderedDict()
+    data_list = []
     for _, row in data_frame.iterrows():
         blk_id_list = re.findall(regex_pattern, row["Content"])
         blk_id_set = set(blk_id_list)
         for blk_id in blk_id_set:
-            if blk_id not in data_dict:
-                data_dict[blk_id] = []
-            data_dict[blk_id].append(row["EventId"])
-    data_df = pd.DataFrame(list(data_dict.items()), columns=column_names)
-    return data_df
+            data_list.append({"Source host": str(blk_id),
+                              "EventId": row["EventId"],
+                              "url_malicious_score": float(row["url_malicious_score"]),
+                              "time [ms]": float(row["time [ms]"]),
+                              "size [B]": float(row["size [B]"]),
+                              "label": str(row["label"])
+                              })
+
+    data_frame = pd.DataFrame(data_list)
+    return data_frame
 
 
 def windower(sequence, window_size):

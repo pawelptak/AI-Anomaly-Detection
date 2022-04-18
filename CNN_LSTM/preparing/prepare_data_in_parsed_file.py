@@ -27,7 +27,7 @@ def get_tokens_for_tfidf(input):
         all_tokens.remove('pl')
     return all_tokens
 
-def prepare_malicious_urls(url='./malicious_data/malicious_urls'):
+def prepare_malicious_urls(url='./malicious_data_patterns/malicious_urls'):
     all_urls_csv = pd.read_csv(url, header=None)
     data = all_urls_csv.values.tolist()
     random.shuffle(data)
@@ -41,9 +41,9 @@ def prepare_tfidf_vectorizer(url):
         fitted_vectorizer = tfidf_vectorizer.fit(corpus)
         return fitted_vectorizer
 
-def prepare_logs_dataframe(url='logs_parsed/nsmc-kibana_new.txt_structured.csv'):
+def prepare_logs_dataframe(url='./logs_data/logs_parsed/nsmc-kibana_new.txt_structured.csv'):
     # check if values from logs are malicious
-    df = pd.read_csv('logs_parsed/nsmc-kibana_new.txt_structured.csv')
+    df = pd.read_csv(url)
 
     # add columns with default values
     df['url_malicious_score'] = 0
@@ -93,13 +93,13 @@ def calculate_malicious_score_in_df_urls(df, fitted_vectorizer):
     return df
 
 
-def prepare_data():
-    fitted_urls_vectorizer = prepare_tfidf_vectorizer(url='./malicious_data/malicious_urls')
+def prepare_data(output_file='./logs_data/logs_parsed/nsmc-kibana_new.txt_structured.csv'):
+    fitted_urls_vectorizer = prepare_tfidf_vectorizer(url='./malicious_data_patterns/malicious_urls')
     if not fitted_urls_vectorizer:
         raise Exception('No fitted vectorizer')
     df = prepare_logs_dataframe()
     df = calculate_malicious_score_in_df_urls(df, fitted_urls_vectorizer)
-    df.to_csv('./logs_parsed/nsmc-kibana_new.txt_structured.csv', index=False)
+    df.to_csv(output_file, index=False)
     return df
 
 if __name__ == '__main__':

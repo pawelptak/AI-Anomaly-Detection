@@ -3,10 +3,10 @@ from sklearn.model_selection import train_test_split
 
 from preparing.sliding_window_processor import prepare_dataframe, FeatureExtractor
 from preparing.prepare_dataset import prepare_custom_datasets, add_padding
-from logparser import logs_parser
+from system_log_parser import logs_parser
 from settings import *
 from preparing import prepare_data_in_parsed_file, prepare_model
-from evaluate.plots import *
+from evaluate_after_training.plots import *
 torch.manual_seed(RANDOM_SEED)
 if torch.cuda.is_available():
     DEVICE = "cuda:0"

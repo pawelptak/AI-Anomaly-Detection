@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import f1_score
 import numpy as np
-from evaluate.plots import *
+from evaluate_after_training.plots import *
 
 
 def compute_accuracy(model, data_loader, DEVICE):

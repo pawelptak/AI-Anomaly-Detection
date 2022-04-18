@@ -5,7 +5,7 @@ import numpy as np
 
 if __name__ == '__main__':
     # this file contains normal and malicious traffic
-    df = pd.read_csv('../logs_prepared/nsmc-kibana.csv')
+    df = pd.read_csv('../logs_data/logs_prepared/nsmc-kibana.csv')
 
     df = df.drop(['type', 'tags', 'pid', 'method', 'statusCode', 'req.url', 'req.method', 'res.responseTime', 'req.headers.accept', 'req.remoteAddress', 'req.userAgent', 'res.statusCode', 'res.contentLength', 'req.headers.x-request-id', 'req.headers.x-real-ip', 'req.headers.x-forwarded-for', 'req.headers.x-forwarded-host', 'req.headers.x-forwarded-proto', 'req.headers.x-original-uri', 'req.headers.x-scheme', 'req.headers.content-length', 'req.headers.accept-language', 'req.headers.accept-encoding', 'req.headers.kbn-version', 'req.headers.origin', 'req.headers.referer', 'req.headers.sec-fetch-dest', 'req.headers.sec-fetch-mode', 'req.headers.sec-fetch-site', 'req.headers.netguard-proxy-roles', 'req.headers.username', 'req.referer', 'req.headers.content-type', 'req.headers.sec-ch-ua', 'req.headers.sec-ch-ua-mobile', 'req.headers.sec-ch-ua-platform', 'req.headers.upgrade-insecure-requests', 'req.headers.sec-fetch-user', 'req.headers.x-requested-with', 'req.headers.cache-control', 'state', 'prevState', 'prevMsg', 'req.headers.if-none-match', 'req.headers.if-modified-since', 'req.headers.dnt', 'req.headers.kbn-xsrf'], axis=1)
 

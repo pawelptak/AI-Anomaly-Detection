@@ -1,6 +1,6 @@
 import sys
 
-from logparser.Drain import Drain
+from system_log_parser.Drain import Drain
 from settings import *
 
 regex = [

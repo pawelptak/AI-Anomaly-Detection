@@ -9,7 +9,7 @@ regex = [
     r"([0-9]*ms)",  # time
     r"([0-9]*\.[0-9]*B)",  # size
 ]
-st = 0.8
+st = 0.3
 depth = 9
 
 parser = Drain.LogParser(

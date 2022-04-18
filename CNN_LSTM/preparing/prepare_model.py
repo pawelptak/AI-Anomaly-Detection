@@ -6,13 +6,13 @@ import pandas as pd
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
-from plots import *
+from evaluate.plots import *
+from evaluate.metrics import compute_f1
 
 
 import time
 
 from settings import *
-from metrics import compute_f1
 
 
 class logCNN(nn.Module):

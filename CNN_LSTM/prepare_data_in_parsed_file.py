@@ -5,10 +5,10 @@ from urllib.parse import urlsplit, parse_qs
 from sklearn.feature_extraction.text import TfidfVectorizer
 import random
 import ast
+from settings import *
 
-MALICIOUS_TRESHOLD = 1.25
 
-def get_tokens(input):
+def get_tokens_for_tfidf(input):
     tokens_by_slash = str(input.encode('utf-8')).split('/')
     tokens_by_slash += str(input.encode('utf-8')).split('\\')
     all_tokens = []
@@ -27,28 +27,21 @@ def get_tokens(input):
         all_tokens.remove('pl')
     return all_tokens
 
-def validate_links_in_csv():
-    # parse malicius url from logs
-    url = "_bulk_get?=%2Fvar%2Flib%2Fmlocate.db%2Fetc%2Fissue"
-    query = urlsplit(url).query
-
-    # read file with malicious urls
-    all_malicious_urls = './malicious_data/malicious_urls'
-    all_urls_csv = pd.read_csv(all_malicious_urls, header=None)
-
-    # add malicious url from logs to df
-    df2 = {0: parse_qs(query)[''][0]}
-    all_urls_csv.append(df2, ignore_index=True)
-
-    # prepare links
+def prepare_malicious_urls(url='./malicious_data/malicious_urls'):
+    all_urls_csv = pd.read_csv(url, header=None)
     data = all_urls_csv.values.tolist()
     random.shuffle(data)
     corpus = [str(d[0]) for d in data]
+    return corpus
 
-    # create TfidfVectorizer and fit it with data
-    tfidf_vectorizer = TfidfVectorizer(tokenizer=get_tokens)
-    fitted_vectorizer = tfidf_vectorizer.fit(corpus)
+def prepare_tfidf_vectorizer(url):
+    corpus = prepare_malicious_urls(url)
+    if corpus:
+        tfidf_vectorizer = TfidfVectorizer(tokenizer=get_tokens_for_tfidf)
+        fitted_vectorizer = tfidf_vectorizer.fit(corpus)
+        return fitted_vectorizer
 
+def prepare_logs_dataframe(url='logs_parsed/nsmc-kibana_new.txt_structured.csv'):
     # check if values from logs are malicious
     df = pd.read_csv('logs_parsed/nsmc-kibana_new.txt_structured.csv')
 
@@ -57,15 +50,33 @@ def validate_links_in_csv():
     df['label'] = 'Normal'
     df['size [B]'] = "0.0"
     df['time [ms]'] = "0"
+    return df
 
-    # for every row, check if url is malicious, if yes, calculate malicious score
+def parse_time_and_size(df, parameter_list, idx):
+    time = [x for x in parameter_list if 'ms ' in x]
+    if time:
+        time = re.search(r'([0-9]*)ms', time[0]).groups()[0]
+        if time:
+            df.loc[idx, 'time [ms]'] = time
+    size = [x for x in parameter_list if 'B' in x]
+    if len(size) > 1:
+        size = size[-1]
+    elif len(size) == 1:
+        size = size[0]
+    if size:
+        size = re.search(r' (.*)B', size).groups()[0]
+        if size:
+            df.loc[idx, 'size [B]'] = size
+    return df
+
+
+def calculate_malicious_score_in_df_urls(df, fitted_vectorizer):
     for idx, row in df.iterrows():
         parameter_list = row['ParameterList']
         parameter_list = ast.literal_eval(parameter_list)
         parameter_list = [n.strip() for n in parameter_list]
         urls = [x for x in parameter_list if 'url' in x]
         for url in urls:
-            # print(url)
             url = re.search(r'\[(.*)\]', url).groups()[0]
             url = parse_qs(url)[''][0]
             if url:
@@ -78,21 +89,18 @@ def validate_links_in_csv():
                     df.loc[idx, 'label'] = 'Malicious'
             else:
                 df.loc[idx, 'url_malicious_score'] = 0
-        time = [x for x in parameter_list if 'ms ' in x]
-        if time:
-            time = re.search(r'([0-9]*)ms', time[0]).groups()[0]
-            if time:
-                df.loc[idx, 'time [ms]'] = time
-        size = [x for x in parameter_list if 'B' in x]
-        if len(size) > 1:
-            size = size[-1]
-        elif len(size) == 1:
-            size = size[0]
-        if size:
-            size = re.search(r' (.*)B', size).groups()[0]
-            if size:
-                df.loc[idx, 'size [B]'] = size
+            df = parse_time_and_size(df, parameter_list, idx)
+    return df
+
+
+def prepare_data():
+    fitted_urls_vectorizer = prepare_tfidf_vectorizer(url='./malicious_data/malicious_urls')
+    if not fitted_urls_vectorizer:
+        raise Exception('No fitted vectorizer')
+    df = prepare_logs_dataframe()
+    df = calculate_malicious_score_in_df_urls(df, fitted_urls_vectorizer)
     df.to_csv('./logs_parsed/nsmc-kibana_new.txt_structured.csv', index=False)
+    return df
 
 if __name__ == '__main__':
-    validate_links_in_csv()
+    prepare_data()

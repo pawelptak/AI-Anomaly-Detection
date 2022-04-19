@@ -1,9 +1,11 @@
-import pandas as pd
 import json
-from pandas import json_normalize
 import os
+
+import pandas as pd
+from pandas import json_normalize
+
 from settings import *
-import csv
+
 
 def json_logs_to_csv(fpath):
     dfs = []

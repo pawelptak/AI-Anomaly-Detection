@@ -1,6 +1,9 @@
 # Kibana logs preprocessing
 Converting kibana pod logs from .log file with json lines to .csv file.
 
+### Required package
+pandas
+
 ### Tested log file
 nsmc-kibana-belk-kibana-5746d988d8-5f4lm.log
 

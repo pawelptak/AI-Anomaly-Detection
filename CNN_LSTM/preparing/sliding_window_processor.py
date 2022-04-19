@@ -65,7 +65,7 @@ def resize_time_image(time_image, size):
     return np.array(Image.fromarray(time_image).resize((width, height)))
 
 
-def fit_transform2(data_frame, max_seq_length, window_size):
+def fit_transform2(data_frame):
     import math
     from collections import Counter
     all_events = data_frame[["EventId"]].values

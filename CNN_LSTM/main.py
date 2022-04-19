@@ -33,7 +33,7 @@ if __name__ == '__main__':
         # collecting events
         dataframe = prepare_dataframe(x, re_pat)
         hosts = dataframe['Source host'].unique()
-        x, labels = fit_transform2(dataframe, 5, 5)
+        x, labels = fit_transform2(dataframe)
         dataframe.to_csv("{}events.csv".format(LOGS_PARSED_OUTPUT_DIR), index=False)
         train_data, test_data, train_labels, test_labels = train_test_split(x, labels, test_size=0.2,
                                                                           random_state=42, stratify=labels)

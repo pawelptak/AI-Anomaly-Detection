@@ -56,8 +56,6 @@ def parse_time_and_size(df, parameter_list, idx):
     time = [x for x in parameter_list if 'ms ' in x]
     if time:
         time = re.search(r'([0-9]*)ms', time[0]).groups()[0]
-        if time:
-            df.loc[idx, 'time [ms]'] = time
     size = [x for x in parameter_list if 'B' in x]
     if len(size) > 1:
         size = size[-1]
@@ -65,9 +63,7 @@ def parse_time_and_size(df, parameter_list, idx):
         size = size[0]
     if size:
         size = re.search(r' (.*)B', size).groups()[0]
-        if size:
-            df.loc[idx, 'size [B]'] = size
-    return df
+    return size, time
 
 
 def calculate_malicious_score_in_df_urls(df, fitted_vectorizer):
@@ -89,7 +85,11 @@ def calculate_malicious_score_in_df_urls(df, fitted_vectorizer):
                     df.loc[idx, 'label'] = 'Malicious'
             else:
                 df.loc[idx, 'url_malicious_score'] = 0
-            df = parse_time_and_size(df, parameter_list, idx)
+        size, time = parse_time_and_size(df, parameter_list, idx)
+        if size:
+            df.loc[idx, 'size [B]'] = size
+        if time:
+            df.loc[idx, 'time [ms]'] = time
     return df
 
 

@@ -20,6 +20,15 @@ pd.options.mode.chained_assignment = None
 import torch.nn.functional as F
 import torch.nn as nn
 
+def standarize_column(df, column):
+    df[column] = (df[column] - df[column].mean()) / df[column].std()
+
+
+def standarize_df(df_path, columns_to_standarize):
+    df = pd.read_csv(df_path)
+    for col in columns_to_standarize:
+        standarize_column(df, col)
+    df.to_csv(df_path)
 
 PREPARE_DATA = True
 if __name__ == '__main__':
@@ -32,11 +41,8 @@ if __name__ == '__main__':
 
         # collecting events
         dataframe = prepare_dataframe(x, re_pat)
-        hosts = dataframe['Source host'].unique()
-
-        # (batch_size, 1, number_of_logs, number_of_features)
+        # dataframe = standarize_df(df_path, columns_to_standarize=['url_malicious_score', 'time [ms]', 'size [B]'])
         x, labels = fit_transform2(dataframe)
-
 
         dataframe.to_csv("{}events.csv".format(LOGS_PARSED_OUTPUT_DIR), index=False)
         train_data, test_data, train_labels, test_labels = train_test_split(x, labels, test_size=0.2,

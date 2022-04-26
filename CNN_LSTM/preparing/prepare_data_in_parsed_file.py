@@ -77,8 +77,8 @@ def calculate_malicious_score_in_df_urls(df, fitted_vectorizer):
             url = parse_qs(url)[''][0]
             if url:
                 tfidf_vectorizer_vectors = fitted_vectorizer.transform([url])
-                t = sorted([float(x) for x in tfidf_vectorizer_vectors.T.todense()], reverse=True)[:6]
-                t = [x for x in t]
+                t = sorted([float(x) for x in tfidf_vectorizer_vectors.T.todense()], reverse=True)[:10]
+                t = [1/x for x in t if x != 0]
                 score = sum(t)
                 df.loc[idx, 'url_malicious_score'] = score
                 if score > MALICIOUS_TRESHOLD:

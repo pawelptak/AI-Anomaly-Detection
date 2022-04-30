@@ -13,6 +13,7 @@ preprocessor = KIBANAPreprocessor()
 
 df = loader.load_train_data()
 df_test = loader.load_test_data()
+test_lines = loader.load_test_data_lines()
 df = preprocessor.preprocess_train_data(df)
 df_test = preprocessor.preprocess_test_data(df_test)
 
@@ -35,6 +36,22 @@ classificator.feed(x_normal, y_normal, [x_normal[0]], [y_normal[0]])
 high_error_indexes = list(
     filter(lambda x: x[1] > 0.6, map(lambda e: e, enumerate(error_normal))))
 
+high_error_indexes = list(
+    filter(lambda x: x[1] > 0.6, map(lambda e: (e[0], e[1][0]), enumerate(error_normal))))
+
+
+def sortSecond(val):
+    return val[1]
+
+
+ordered_errors = list(
+    map(lambda e: (e[0], e[1][0]), enumerate(error_normal)))
+ordered_errors.sort(key=sortSecond, reverse=True)
+one_hunder_highest_errors_indicies = list(map(
+    lambda x: x[0], ordered_errors[:20]))
+
+for index in one_hunder_highest_errors_indicies:
+    print(test_lines[index])
 # errors = np.concatenate([error_anomaly, error_normal])
 # y_label = np.concatenate([[1 for _ in range(len(error_anomaly))],
 #                           [0 for _ in range(len(error_normal))]])

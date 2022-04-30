@@ -15,6 +15,10 @@ class KIBANALoader:
     def load_test_data(self):
         return self.__load_data(self.data_testpath)
 
+    def load_test_data_lines(self):
+        with open(self.data_testpath) as file:
+            return file.readlines()
+
     def load_predict_data(self, path: str):
         return self.__load_data(path)
 

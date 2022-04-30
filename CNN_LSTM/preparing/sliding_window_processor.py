@@ -7,24 +7,31 @@ import re
 from collections import OrderedDict
 from collections import Counter
 from PIL import Image
+from sklearn.preprocessing import MinMaxScaler
+import math
+from collections import Counter
 
-
-def collect_event_ids(data_frame, regex_pattern, column_names):
+def prepare_dataframe(data_frame, regex_pattern):
     """
     turns input data_frame into a 2 columned dataframe
     with columns: BlockId, EventSequence
     where EventSequence is a list of the events that happened to the block
     """
-    data_dict = OrderedDict()
+    data_list = []
     for _, row in data_frame.iterrows():
         blk_id_list = re.findall(regex_pattern, row["Content"])
         blk_id_set = set(blk_id_list)
         for blk_id in blk_id_set:
-            if blk_id not in data_dict:
-                data_dict[blk_id] = []
-            data_dict[blk_id].append(row["EventId"])
-    data_df = pd.DataFrame(list(data_dict.items()), columns=column_names)
-    return data_df
+            data_list.append({"Source host": str(blk_id),
+                              "EventId": row["EventId"],
+                              "url_malicious_score": float(row["url_malicious_score"]),
+                              "time [ms]": float(row["time [ms]"]),
+                              "size [B]": float(row["size [B]"]),
+                              "label": str(row["label"])
+                              })
+
+    data_frame = pd.DataFrame(data_list)
+    return data_frame
 
 
 def windower(sequence, window_size):
@@ -56,6 +63,44 @@ def resize_time_image(time_image, size):
     width = size[1]
     height = size[0]
     return np.array(Image.fromarray(time_image).resize((width, height)))
+
+
+def fit_transform2(data_frame):
+    import math
+    from collections import Counter
+    all_events = data_frame[["EventId"]].values
+    all_events = all_events.reshape(-1)
+    all_events_dict = dict(Counter(all_events))
+    matrix_size = (6, 4)
+    columns_in_one_log = 4
+    logs_in_one_matrix = math.floor((matrix_size[0] * matrix_size[1])/columns_in_one_log)
+    number_of_all_matrixes = len(all_events) - 8
+    data_frame["url_malicious_score"] = MinMaxScaler().fit_transform(data_frame["url_malicious_score"].values.reshape(-1, 1))
+    data_frame["time [ms]"] = MinMaxScaler().fit_transform(data_frame["time [ms]"].values.reshape(-1, 1))
+    data_frame["size [B]"] = MinMaxScaler().fit_transform(data_frame["size [B]"].values.reshape(-1, 1))
+    rows_number = data_frame.shape[0]
+    number_of_matrixes = rows_number - columns_in_one_log - 1
+    labels = []
+    x = np.zeros((number_of_matrixes, matrix_size[0], matrix_size[1]))
+    for i in range(number_of_matrixes):
+        window = data_frame.iloc[i:i+logs_in_one_matrix, :]
+        window_labels = window.iloc[:, -1]
+        features = window[["EventId", "url_malicious_score", "time [ms]", "size [B]"]]
+        if features.shape[0] != 6:
+            break
+        events_in_window = dict(Counter(list(features.EventId.values)))
+        for index, row in enumerate(features.itertuples()):
+            features.iloc[index, 0] = math.log(number_of_all_matrixes/all_events_dict[row.EventId])
+        features_numpy = np.array(features.values)
+        if np.any(window_labels == "Malicious"):
+            labels.append(1)
+        else:
+            labels.append(0)
+        x[i] = features_numpy
+    labels = np.array(labels)
+    x = x.reshape(x.shape[0], 1, x.shape[1], x.shape[2])
+    print(x.shape)
+    return x, labels
 
 
 class FeatureExtractor(object):

@@ -6,25 +6,24 @@ import pandas as pd
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
-from plots import *
+from evaluate_after_training.plots import *
+from evaluate_after_training.metrics import compute_f1
 
 
 import time
 
 from settings import *
-from metrics import compute_f1
-
 
 class logCNN(nn.Module):
     def __init__(self, num_classes):
         super(logCNN, self).__init__()
         self.num_classes = num_classes
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=(5, 5), stride=2, padding=2),
+            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=(3, 3), stride=2, padding=2),
             nn.ReLU(),
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=(5, 5), stride=2, padding=2),
+            nn.Conv2d(16, 32, kernel_size=(3, 3), stride=2, padding=2),
             nn.ReLU(),
         )
         self.linear1 = nn.Linear(32 * 7 * 7, 10)
@@ -44,8 +43,7 @@ class logCNN(nn.Module):
         x = x.permute(0, 2, 1)
         x, _ = self.lstm(x, self.hidden)
         y = self.linear2(x[:, -1, :])
-        prob = F.softmax(y)
-        return y, prob
+        return y
 
 
 def train_model(DEVICE, train_loader, val_loader, model):

@@ -6,6 +6,7 @@ from Model.AutoEncoderModelLSTM import AutoEncoderModelLSTM
 import numpy as np
 import matplotlib.pyplot as plt
 from Analisis.AutoencoderResultsAnlyzer import AutoencoderResultsAnlyzer
+from vectorizer_function import get_tokens_for_tfidf
 
 UNITS = [80, 50, 20]
 WINDOW_SIZE = 20

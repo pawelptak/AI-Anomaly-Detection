@@ -18,7 +18,6 @@ def calculate_malucious_score_for_urls(df):
                 tfidf_vectorizer_vectors = vecorizer.transform([value[0]])
                 score = sum([float(x) for x in tfidf_vectorizer_vectors.T.todense()])
                 if score > 0:
-                    print(score)
                     df.loc[i, 'url_mal_score'] += score
     return df
 

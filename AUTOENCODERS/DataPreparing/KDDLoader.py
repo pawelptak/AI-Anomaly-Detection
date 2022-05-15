@@ -20,11 +20,17 @@ class KDDLoader:
                           "dst_host_srv_diff_host_rate", "dst_host_serror_rate", "dst_host_srv_serror_rate",
                           "dst_host_rerror_rate", "dst_host_srv_rerror_rate", "label"]
 
+    """ load train data """
+
     def load_train_data(self):
         return self.__load_data(self.data_trainpath)
 
+    """ load test data """
+
     def load_test_data(self):
         return self.__load_data(self.data_testpath)
+
+    """ load additional data for further predictions (optional) """
 
     def load_predict_data(self, path: str):
         return self.__load_data(path)

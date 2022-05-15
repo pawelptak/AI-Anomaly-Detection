@@ -23,12 +23,21 @@ class KDDPreprocessor:
                                    'ftp_write': 3, 'guess_passwd': 3, 'imap': 3, 'multihop': 3, 'phf': 3, 'spy': 3, 'warezclient': 3, 'warezmaster': 3, 'sendmail': 3, 'named': 3, 'snmpgetattack': 3, 'snmpguess': 3, 'xlock': 3, 'xsnoop': 3, 'httptunnel': 3,
                                    'buffer_overflow': 4, 'loadmodule': 4, 'perl': 4, 'rootkit': 4, 'ps': 4, 'sqlattack': 4, 'xterm': 4}
 
+    """ preprocess train data """
+
     def preprocess_train_data(self, df: pd.DataFrame, label='normal'):
+        """ group attacks into categories """
         if(self.group_records):
             df['label'] = df['label'].replace(self.attacks_categories)
 
+        """ Take only data marked with specifies label """
         df = df[df['label'] == label]
         df.reset_index(drop=True, inplace=True)
+
+        """ 
+        Perform one hot encoding on categorical data 
+        Encoders should be saved so can be used for preprocessing test / incomming data
+        """
         self.train_categorical_unique = {col: np.array(sorted(
             df[col].unique())) for col in self.categorical_columns}
 
@@ -46,17 +55,26 @@ class KDDPreprocessor:
             df = df.join(new_data_frame)
             df.drop(col, axis=1, inplace=True)
 
+        """ Drop the label column """
         df.drop('label', axis=1, inplace=True)
+
+        """ Drop the label column """
         self.scaler = MinMaxScaler()
         x = df.values  # returns a numpy array
         df = pd.DataFrame(self.scaler.fit_transform(x), columns=df.columns)
 
+        """ 
+        If represent the data as windows - group logs into windows. 
+        Otherwise return data in single lines format
+        """
         if(self.is_windows):
 
             windows = self.__get_windows(df, self.window_size, self.stride)
             return windows
 
         return df
+
+    """ preprocess test data """
 
     def preprocess_test_data(self, df: pd.DataFrame, label='neptune'):
         if(self.group_records):
@@ -80,6 +98,10 @@ class KDDPreprocessor:
         x = df.values  # returns a numpy array
         df = pd.DataFrame(self.scaler.transform(x), columns=df.columns)
 
+        """ 
+        If represent the data as windows - group logs into windows. 
+        Otherwise return data in single lines format
+        """
         if(self.is_windows):
             windows = self.__get_windows(df, self.window_size, self.stride)
             y_label = [1 if np.sum(status[i:i+self.window_size]) > 0 else 0 for i in range(
@@ -88,6 +110,8 @@ class KDDPreprocessor:
             return(windows, y_label)
 
         return df
+
+    """ (optional) - it allows to group multiple attacks into one group """
 
     def preprocess_test_data_multilabel(self, df: pd.DataFrame, normal_label, attack_label):
         if(self.group_records):

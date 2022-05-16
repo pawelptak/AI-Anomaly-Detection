@@ -8,7 +8,7 @@ The goal of this project is to detect anomalies from syslog/json data using CNN 
 
 The app will be deployed based on the following approaches:
 * [Log Anomaly Detection](https://github.com/WraySmith/log-anomaly)
-* [Using Machine Learning to Detect Malicious URLs]https://www.kdnuggets.com/2016/10/machine-learning-detect-malicious-urls.html
+* [Using Machine Learning to Detect Malicious URLs](https://www.kdnuggets.com/2016/10/machine-learning-detect-malicious-urls.html)
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -80,7 +80,7 @@ Here are the steps:
 
 1. The raw logs are transformed to csv format (from json/syslog format)
 2. The csv file is parsed by Drain algorithm and saved in the LOGS_PARSED_OUTPUT_DIR directory. Drain algorithm can parse syslog/json logs and extract features from them. In this case, the features are '''source, url, time and size'''.
-3. The extracted features are transformed into a pandas dataframe that contains columns :Source host,EventId,url_malicious_score,time [ms],size [B],label. Url malicious score is calculated based on this approach: https://www.kdnuggets.com/2016/10/machine-learning-detect-malicious-urls.html
+3. The extracted features are transformed into a pandas dataframe that contains columns :Source host,EventId,url_malicious_score,time [ms],size [B],label. Url malicious score is calculated based on this approach: [Using Machine Learning to Detect Malicious URLs](https://www.kdnuggets.com/2016/10/machine-learning-detect-malicious-urls.html)
 4. The dataframe is transformed into a sequence of time steps. Each time step is a row in the dataframe. The sequence length is defined by SEQ_LENGTH.
 5. We train the model.
 6. We test the model and display confusion matrix.

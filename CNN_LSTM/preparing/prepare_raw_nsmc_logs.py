@@ -1,13 +1,51 @@
 import pandas as pd
-import re
 import numpy as np
+import re
+import os
+from settings import RAW_LOGS_INPUT_DIR, LOGS_CSV_OUTPUT_DIR, UNPARSED_FILE, LOGS_PARSED_OUTPUT_DIR
+from pandas import json_normalize
+import json
+
+def starts_with_timestamp(line):
+    pattern = re.compile("^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
+    return bool(pattern.match(line))
 
 
-if __name__ == '__main__':
-    # this file contains normal and malicious traffic
-    df = pd.read_csv('../logs_data/logs_prepared/nsmc-kibana.csv')
+def multiline_logs_processing(fpath):
+    dfs = []
+    with open(fpath) as f:
+        logs = f.readlines()
+        for log in logs:
+            json_log = json.loads(log)
+            df = json_normalize(json_log)
+            dfs.append(df)
+    all_logs_df = pd.concat(dfs)
+    all_logs_df.dropna(how='all', axis=1, inplace=True)
+    all_logs_df.to_csv(f'{LOGS_PARSED_OUTPUT_DIR}{UNPARSED_FILE}', index=False)
+    return all_logs_df
 
-    df = df.drop(['type', 'tags', 'pid', 'method', 'statusCode', 'req.url', 'req.method', 'res.responseTime', 'req.headers.accept', 'req.remoteAddress', 'req.userAgent', 'res.statusCode', 'res.contentLength', 'req.headers.x-request-id', 'req.headers.x-real-ip', 'req.headers.x-forwarded-for', 'req.headers.x-forwarded-host', 'req.headers.x-forwarded-proto', 'req.headers.x-original-uri', 'req.headers.x-scheme', 'req.headers.content-length', 'req.headers.accept-language', 'req.headers.accept-encoding', 'req.headers.kbn-version', 'req.headers.origin', 'req.headers.referer', 'req.headers.sec-fetch-dest', 'req.headers.sec-fetch-mode', 'req.headers.sec-fetch-site', 'req.headers.netguard-proxy-roles', 'req.headers.username', 'req.referer', 'req.headers.content-type', 'req.headers.sec-ch-ua', 'req.headers.sec-ch-ua-mobile', 'req.headers.sec-ch-ua-platform', 'req.headers.upgrade-insecure-requests', 'req.headers.sec-fetch-user', 'req.headers.x-requested-with', 'req.headers.cache-control', 'state', 'prevState', 'prevMsg', 'req.headers.if-none-match', 'req.headers.if-modified-since', 'req.headers.dnt', 'req.headers.kbn-xsrf'], axis=1)
+
+def prepare_raw_nsmc_data():
+    for fname in os.listdir(RAW_LOGS_INPUT_DIR):
+        if fname.endswith('log'):
+            fpath = os.path.join(RAW_LOGS_INPUT_DIR, fname)
+            df = multiline_logs_processing(fpath)
+
+    print("Logs are prepared in csv format and saved to: ", LOGS_PARSED_OUTPUT_DIR)
+    df = pd.read_csv(f'{LOGS_PARSED_OUTPUT_DIR}{UNPARSED_FILE}')
+    df = df.drop(['type', 'tags', 'pid', 'method', 'statusCode', 'req.url', 'req.method', 'res.responseTime',
+                  'req.headers.accept', 'req.remoteAddress', 'req.userAgent', 'res.statusCode', 'res.contentLength',
+                  'req.headers.x-request-id', 'req.headers.x-real-ip', 'req.headers.x-forwarded-for',
+                  'req.headers.x-forwarded-host', 'req.headers.x-forwarded-proto', 'req.headers.x-original-uri',
+                  'req.headers.x-scheme', 'req.headers.content-length', 'req.headers.accept-language',
+                  'req.headers.accept-encoding', 'req.headers.kbn-version', 'req.headers.origin',
+                  'req.headers.referer', 'req.headers.sec-fetch-dest', 'req.headers.sec-fetch-mode',
+                  'req.headers.sec-fetch-site', 'req.headers.netguard-proxy-roles', 'req.headers.username',
+                  'req.referer', 'req.headers.content-type', 'req.headers.sec-ch-ua', 'req.headers.sec-ch-ua-mobile',
+                  'req.headers.sec-ch-ua-platform', 'req.headers.upgrade-insecure-requests',
+                  'req.headers.sec-fetch-user', 'req.headers.x-requested-with', 'req.headers.cache-control',
+                  'state', 'prevState', 'prevMsg', 'req.headers.if-none-match', 'req.headers.if-modified-since',
+                  'req.headers.dnt', 'req.headers.kbn-xsrf'], axis=1)
 
     # remove some special signs from column names
     df.columns = [re.sub('\.', '_', col) for col in df.columns]
@@ -75,4 +113,4 @@ if __name__ == '__main__':
         if pd.isnull(row.req_headers_netguard_proxy_user):
             df.loc[idx, 'req_headers_netguard_proxy_user'] = '-'
 
-    np.savetxt('./logs_prepared/nsmc-kibana_new.txt', df.values, fmt="%s")
+    np.savetxt(F'{LOGS_CSV_OUTPUT_DIR}{UNPARSED_FILE}', df.values, fmt="%s")

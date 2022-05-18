@@ -1,5 +1,5 @@
 # Dense-Autoencoder
-Autoencoder with Dense layers for anomaly detection.
+Simple implementation of Autoencoder with Dense layers for anomaly detection.
 
 ### Installation
 Install all Python libraries listed in the dense_autoencoder/requirements.txt file.

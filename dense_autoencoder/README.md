@@ -26,6 +26,8 @@ Example:
 python aytoencoder_training.py /data/processed/processed.csv 90
 ```
 
+A machine learning model file (.h5 extension) is generated as output.
+
 #### Model testing
 ```bash
 python aytoencoder_testing.py [model .h5 file path]  -t[anomaly detection threshold] (optional)

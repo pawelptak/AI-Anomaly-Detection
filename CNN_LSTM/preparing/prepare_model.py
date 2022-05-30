@@ -6,9 +6,9 @@ from settings import *
 
 
 class logCNN(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, config):
         super(logCNN, self).__init__()
-        self.num_classes = num_classes
+        self.num_classes = config.num_classes
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16, kernel_size=(3, 3), stride=2, padding=2),
             nn.ReLU(),
@@ -19,9 +19,9 @@ class logCNN(nn.Module):
         )
         self.linear1 = nn.Linear(32 * 7 * 7, 10)
 
-        self.lstm = nn.LSTM(LSTM_INPUT_SIZE, HIDDEN_SIZE, NUM_LAYERS, batch_first=True)
-        self.hidden = self.init_hidden(BATCH_SIZE, HIDDEN_SIZE, NUM_LSTM_DIRECTIONS, NUM_LAYERS)
-        self.linear2 = nn.Linear(HIDDEN_SIZE, num_classes)
+        self.lstm = nn.LSTM(config.lstm_input_size, config.hidden_size, config.num_layers, batch_first=True)
+        self.hidden = self.init_hidden(config.batch_size, config.hidden_size, config.num_lstm_directions, config.num_layers)
+        self.linear2 = nn.Linear(config.hidden_size, config.num_classes)
 
     def init_hidden(self, batch_size, hidden_size, num_directions, num_layers):
         return (torch.autograd.Variable(torch.zeros(num_directions * num_layers, batch_size, hidden_size)),
@@ -37,24 +37,4 @@ class logCNN(nn.Module):
         return y
 
 
-def train_model(model, train_loader, device):
-    print("Start training...")
-    optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
-    loss_function = nn.CrossEntropyLoss()
-    for epoch in range(NUM_EPOCHS):
-        for i, (data, labels) in enumerate(train_loader):
-            if data.shape[0] != BATCH_SIZE:
-                break
-            data = data.to(device)
-            labels = labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(data)
-            loss = loss_function(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            if i % 100 == 0:
-                print("Epoch: {}/{}".format(epoch, NUM_EPOCHS),
-                      "Step: {}".format(i),
-                      "Loss: {}".format(loss.item()))
-            _, predicted = torch.max(outputs.data, 1)
-    return model
+

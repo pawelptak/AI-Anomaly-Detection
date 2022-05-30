@@ -3,6 +3,10 @@ import numpy as np
 import pandas as pd
 import tqdm
 
+"""
+Class for Preprocessing CICIDS2017 Data represented as windows
+"""
+
 
 class CICIDSPreprocessorWindows:
     def __init__(self, window_size=20, stride=10):

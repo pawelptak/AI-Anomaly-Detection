@@ -12,6 +12,11 @@ def flat_map(f, xs):
     return ys
 
 
+"""
+Class for Preprocessing CICIDS2017 Data represented as rows
+"""
+
+
 class EVENTSEQUENCEPreprocessor:
     def __init__(self):
         self.label_column = 'Label'

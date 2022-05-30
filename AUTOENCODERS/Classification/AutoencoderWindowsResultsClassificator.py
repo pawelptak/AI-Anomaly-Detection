@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 
+"""
+The class contains methods to compute the best threshold and perform the classification.
+It may be used for data splitted into rows
+"""
+
+
 class AutoencoderWindowsResultsClassificator:
     def __init__(self):
         pass
@@ -45,8 +51,12 @@ class AutoencoderWindowsResultsClassificator:
 
         return (self.max_f1_score, self.best_threshold)
 
-    def classify(self, X):
-        pass
+    """ Classify based on best threshold. 0 - Normal, 1- Anomaly """
+
+    def classify(self, X, Y):
+        errors = self.__calculate_reconstruction_error_windows(X, Y)
+
+        list(filter(lambda e: 1 if e else 0, errors >= self.best_threshold))
 
     def __calculate_reconstruction_error_windows(self, true_windows, pred_windows):
         reconstruction_errors = []

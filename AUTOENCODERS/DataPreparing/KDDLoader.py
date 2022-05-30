@@ -1,5 +1,11 @@
 import pandas as pd
 
+"""
+Class for Loading KDDCUP99 Data
+The full data can be found here:
+http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html
+"""
+
 
 class KDDLoader:
     def __init__(self, service="http"):

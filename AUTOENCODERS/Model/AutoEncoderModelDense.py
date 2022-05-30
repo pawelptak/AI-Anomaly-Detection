@@ -9,6 +9,11 @@ from Model.AutoEncoderModelBase import AutoEncoderModelBase
 import numpy as np
 
 
+"""
+Autoencoder with 2 dense layers (1 for encoding, 1 for decoding)
+"""
+
+
 class AutoEncoderModelDense_1(AutoEncoderModelBase):
     def __init__(self, features_number, dense_size=20):
         self.features_number = features_number
@@ -28,6 +33,11 @@ class AutoEncoderModelDense_1(AutoEncoderModelBase):
         self.model.compile(opt, loss='mse')
 
         return self.model
+
+
+"""
+Autoencoder with 4 dense layers (2 for encoding, 2 for decoding)
+"""
 
 
 class AutoEncoderModelDense_2(AutoEncoderModelBase):

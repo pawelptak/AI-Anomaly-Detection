@@ -2,6 +2,12 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from os.path import exists
 
+"""
+Class for Loading CICIDS2017 Data
+The full data can be found here:
+https://www.unb.ca/cic/datasets/ids-2017.html
+"""
+
 
 class CICIDSLoader:
     def __init__(self, attack):

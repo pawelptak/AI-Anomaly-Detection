@@ -3,6 +3,11 @@ from tensorflow.keras import Sequential
 from Model.AutoEncoderModelBase import AutoEncoderModelBase
 
 
+"""
+The class allows to fit the model and perform the predictions
+"""
+
+
 class AutoencoderModelExecutor:
     def __init__(self, model: AutoEncoderModelBase, epochs=5):
         self.model = model.build_model()

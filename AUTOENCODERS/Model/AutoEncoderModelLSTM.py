@@ -10,6 +10,11 @@ from tensorflow.keras.layers import Dense, LSTM, TimeDistributed, RepeatVector
 import numpy as np
 
 
+"""
+Autoencoders with LSTM layers
+"""
+
+
 class AutoEncoderModelLSTM(AutoEncoderModelBase):
     def __init__(self, features_number, window_size=20, units=[80, 50, 20]):
         self.features_number = features_number

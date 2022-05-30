@@ -5,6 +5,10 @@ import pandas as pd
 import tqdm
 from datetime import datetime
 
+"""
+Class for Preprocessing The Data
+"""
+
 
 class KIBANAPreprocessor:
     def __init__(self, windows=False, windows_size=20, windows_stride=2):

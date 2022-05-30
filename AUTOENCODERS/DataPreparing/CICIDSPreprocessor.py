@@ -3,6 +3,10 @@ import numpy as np
 import pandas as pd
 import tqdm
 
+"""
+Class for Preprocessing CICIDS2017 Data represented as rows
+"""
+
 
 class CICIDSPreprocessor:
     def __init__(self):

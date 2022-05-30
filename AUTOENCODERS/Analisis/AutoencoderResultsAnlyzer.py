@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+"""
+This class is used to analyze the experiment results, plotting the results
+"""
+
 
 class AutoencoderResultsAnlyzer:
     def __init__(self):

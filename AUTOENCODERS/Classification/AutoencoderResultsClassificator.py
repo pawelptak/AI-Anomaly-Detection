@@ -4,6 +4,11 @@ from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve, f1_score
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+"""
+The class contains methods to compute the best threshold and perform the classification
+It may be used for data splitted into windows
+"""
+
 
 class AutoencoderResultsClassificator:
     def __init__(self):
@@ -62,8 +67,15 @@ class AutoencoderResultsClassificator:
 
         return (self.max_f1_score, self.best_threshold)
 
-    def classify(self, X):
-        pass
+    """ Classify based on best threshold. 0 - Normal, 1- Anomaly """
+
+    def classify(self, X, Y):
+        error = self.__calculate_reconstruction_error(X, Y)
+
+        if error < self.best_threshold:
+            return 0
+
+        return 1
 
     def __calculate_reconstruction_error(self, X, Y):
         return np.sum(np.abs(np.subtract(X, Y)), axis=1)

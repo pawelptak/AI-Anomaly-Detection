@@ -4,6 +4,11 @@ import pandas as pd
 import tqdm
 
 
+"""
+Class for Preprocessing KDD Data
+"""
+
+
 class KDDPreprocessor:
     def __init__(self, group_records=False, is_window=False, window_size=1, stride=1):
         self.categorical_columns = ['protocol_type', 'service', 'flag']

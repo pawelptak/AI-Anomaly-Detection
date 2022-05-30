@@ -1,6 +1,10 @@
 import pandas as pd
 import json
 
+"""
+Class for Loading Data from Kubernetes component, in json format
+"""
+
 
 class KIBANALoader:
     def __init__(self):

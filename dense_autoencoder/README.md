@@ -1,5 +1,5 @@
 # Dense-Autoencoder
-Autoencoder with Dense layers for anomaly detection.
+Simple implementation of Autoencoder with Dense layers for anomaly detection.
 
 ### Installation
 Install all Python libraries listed in the dense_autoencoder/requirements.txt file.
@@ -25,6 +25,8 @@ Example:
 ```bash
 python aytoencoder_training.py /data/processed/processed.csv 90
 ```
+
+A machine learning model file (dense_model.h5) is generated as output.
 
 #### Model testing
 ```bash

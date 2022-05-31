@@ -24,11 +24,11 @@ class Config:
     hidden_size: int = 20
     num_lstm_directions: int = 1
     malicious_treshold: float = 1.25
-    raw_logs: bool = False
-    parse_logs: bool = False
-    prepare_dataframe: bool = False
-    prepare_nsmc_logs_for_parsing: bool = False
-    log_type: str = "k8s"
+    raw_logs: bool = True
+    parse_logs: bool = True
+    prepare_dataframe: bool = True
+    prepare_nsmc_logs_for_parsing: bool = True
+    log_type: str = "nsmc"
     raw_logs_dir: str = "data/logs_raw/"
     prepared_logs_dir: str = "data/logs_prepared/"
     parsed_logs_dir: str = "data/logs_parsed/"
@@ -41,7 +41,7 @@ class Config:
 
 
 def main() -> None:
-    config = Config(filename="k8s-dashboard-gk-keycloa.log")
+    config = Config(filename="nsmc-kibana-belk-kibana.log")
     preparing = Preparing(config)
 
     torch.manual_seed(config.random_seed)

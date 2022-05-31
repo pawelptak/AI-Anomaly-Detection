@@ -11,12 +11,10 @@ class Parser:
     def __init__(self, config):
         if config.log_type == "nsmc":
             self.regex = [
-                r'client_ip\": "(.*)[0-9]",',  # source
-                r'path\": "(.*)"',  # url
-                r'method\": "(.*)",',  # method
-                r'bytes\": [0-9]*,',  # size
-                r'status\": [0-9]*,',  # status
-                r'latency\": ([0-9]*.[0-9]*),',  # time
+                r"host=(\[.*])",  # source
+                r"url(=\[.*\])",  # url
+                r"([0-9]*ms)",  # time
+                r"([0-9]*\.[0-9]*B)",  # size
             ]
         elif config.log_type == "k8s":
             self.regex = [
@@ -29,7 +27,7 @@ class Parser:
             ]
         
         self.parser = Drain.LogParser(
-            self.log_format, indir=config.raw_logs_dir, outdir=config.parsed_logs_dir, depth=self.depth, st=self.st, rex=self.regex
+            self.log_format, indir=config.prepared_logs_dir, outdir=config.parsed_logs_dir, depth=self.depth, st=self.st, rex=self.regex
         )
         self.filename = config.filename
 

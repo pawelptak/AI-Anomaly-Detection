@@ -4,14 +4,14 @@ import re
 import os
 from pandas import json_normalize
 import json
+from alive_progress import alive_bar
 
 
 class PrepareNSMCLogs:
     def __init__(self, config):
         self.raw_logs_dir = config.raw_logs_dir
         self.prepared_logs_dir = config.prepared_logs_dir
-        self.logs_csv_output_dir = config.logs_csv_output_dir
-        self.unparsed_file = config.unparsed_file
+        self.filename = config.filename
 
     @staticmethod
     def starts_with_timestamp(line):
@@ -20,25 +20,26 @@ class PrepareNSMCLogs:
 
     def multiline_logs_processing(self, fpath):
         dfs = []
+        
         with open(fpath) as f:
             logs = f.readlines()
-            for log in logs:
-                json_log = json.loads(log)
-                df = json_normalize(json_log)
-                dfs.append(df)
+            with alive_bar(len(logs), title="Parsing json to csv") as bar:
+                for log in logs:
+                    json_log = json.loads(log)
+                    df = json_normalize(json_log)
+                    dfs.append(df)
+                    bar()
         all_logs_df = pd.concat(dfs)
         all_logs_df.dropna(how='all', axis=1, inplace=True)
-        all_logs_df.to_csv(f'{self.prepared_logs_dir}{self.unparsed_file}', index=False)
+        all_logs_df.to_csv(f'{self.prepared_logs_dir}{self.filename}', index=False)
         return all_logs_df
 
     def prepare_raw_nsmc_data(self):
-        for fname in os.listdir(self.raw_logs_dir):
-            if fname.endswith('log'):
-                fpath = os.path.join(self.raw_logs_dir, fname)
-                self.multiline_logs_processing(fpath)
+        fpath = os.path.join(self.raw_logs_dir, self.filename)
+        self.multiline_logs_processing(fpath)
 
         print("Logs are prepared in csv format and saved to: ", self.prepared_logs_dir)
-        df = pd.read_csv(f'{self.prepared_logs_dir}{self.unparsed_file}')
+        df = pd.read_csv(f'{self.prepared_logs_dir}{self.filename}')
         df = df.drop(['type', 'tags', 'pid', 'method', 'statusCode', 'req.url', 'req.method', 'res.responseTime',
                       'req.headers.accept', 'req.remoteAddress', 'req.userAgent', 'res.statusCode', 'res.contentLength',
                       'req.headers.x-request-id', 'req.headers.x-real-ip', 'req.headers.x-forwarded-for',
@@ -126,4 +127,4 @@ class PrepareNSMCLogs:
         return df
 
     def save_prepared_data(self, df):
-        np.savetxt(F'{self.logs_csv_output_dir}{self.unparsed_file}', df.values, fmt="%s")
+        np.savetxt(F'{self.prepared_logs_dir}{self.filename}', df.values, fmt="%s")

@@ -1,7 +1,7 @@
-from prepare_raw_nsmc_logs import PrepareNSMCLogs
-from prepare_model import logCNN
-from tfidf import UrlTFIDF
-from prepare_data import NsmcPreprocessing, K8sPreprocessing
+from preparing.prepare_raw_nsmc_logs import PrepareNSMCLogs
+from preparing.prepare_model import logCNN
+from preparing.tfidf import UrlTFIDF
+from preparing.prepare_data import NsmcPreprocessing, K8sPreprocessing
 import torch
 from data.dataset import logDataset
 from torch.utils.data import DataLoader
@@ -37,7 +37,7 @@ class Preparing:
             raise Exception('No such log type')
         df = self.preprocessing.prepare_logs_dataframe()
         df = self.preprocessing.prepare_logs(df, fitted_urls_vectorizer)
-        df.to_csv(self.config.prepared_logs_dir+, index=False)
+        df.to_csv(self.config.prepared_data, index=False)
         return df
 
     def load_preprocessed_data(self):

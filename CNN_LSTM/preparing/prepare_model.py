@@ -36,5 +36,25 @@ class logCNN(nn.Module):
         y = self.linear2(x[:, -1, :])
         return y
 
-
+def train_model(model, train_loader, device):
+    print("Start training...")
+    optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
+    loss_function = nn.CrossEntropyLoss()
+    for epoch in range(NUM_EPOCHS):
+        for i, (data, labels) in enumerate(train_loader):
+            if data.shape[0] != BATCH_SIZE:
+                break
+            data = data.to(device)
+            labels = labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(data)
+            loss = loss_function(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            if i % 100 == 0:
+                print("Epoch: {}/{}".format(epoch, NUM_EPOCHS),
+                      "Step: {}".format(i),
+                      "Loss: {}".format(loss.item()))
+            _, predicted = torch.max(outputs.data, 1)
+    return model
 

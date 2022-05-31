@@ -4,8 +4,14 @@ import pandas as pd
 
 
 class UrlTFIDF:
-    def __int__(self, url='./malicious_data_patterns/malicious_urls'):
-        self.malicious_examples_url = url
+    malicious_examples_url = './malicious_data_patterns/malicious_urls'
+
+    def __init__(self):
+        corpus = self.prepare_malicious_urls()
+        if corpus:
+            tfidf_vectorizer = TfidfVectorizer(tokenizer=self.get_tokens_for_tfidf)
+            fitted_vectorizer = tfidf_vectorizer.fit(corpus)
+            self.fitted_vectorizer = fitted_vectorizer
 
     def get_tokens_for_tfidf(self, input):
         tokens_by_slash = str(input.encode('utf-8')).split('/')
@@ -33,9 +39,3 @@ class UrlTFIDF:
         corpus = [str(d[0]) for d in data]
         return corpus
 
-    def __init__(self, url):
-        corpus = self.prepare_malicious_urls()
-        if corpus:
-            tfidf_vectorizer = TfidfVectorizer(tokenizer=self.get_tokens_for_tfidf)
-            fitted_vectorizer = tfidf_vectorizer.fit(corpus)
-            self.fitted_vectorizer = fitted_vectorizer

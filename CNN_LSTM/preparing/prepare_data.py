@@ -11,6 +11,7 @@ from urllib.parse import parse_qs
 import ast
 import multiprocessing
 import time
+from alive_progress import alive_bar
 
 
 class Preprocessing:
@@ -66,21 +67,24 @@ class Preprocessing:
         number_of_matrixes = rows_number - columns_in_one_log - 1
         labels = []
         x = np.zeros((number_of_matrixes, matrix_size[0], matrix_size[1]))
-        for i in range(number_of_matrixes):
-            window = data_frame.iloc[i:i + logs_in_one_matrix, :]
-            window_labels = window.iloc[:, -1]
-            features = window[["EventId", "url_malicious_score", "time [ms]", "size [B]"]]
-            if features.shape[0] != 6:
-                break
-            events_in_window = dict(Counter(list(features.EventId.values)))
-            for index, row in enumerate(features.itertuples()):
-                features.iloc[index, 0] = math.log(number_of_all_matrixes / all_events_dict[row.EventId])
-            features_numpy = np.array(features.values)
-            if np.any(window_labels == "Malicious"):
-                labels.append(1)
-            else:
-                labels.append(0)
-            x[i] = features_numpy
+        with alive_bar(number_of_matrixes, title="Collecting windows for training...") as bar:
+            for i in range(number_of_matrixes):
+                window = data_frame.iloc[i:i + logs_in_one_matrix, :]
+                window_labels = window.iloc[:, -1]
+                features = window[["EventId", "url_malicious_score", "time [ms]", "size [B]"]]
+                if features.shape[0] != 6:
+                    break
+                events_in_window = dict(Counter(list(features.EventId.values)))
+                for index, row in enumerate(features.itertuples()):
+                    features.iloc[index, 0] = math.log(number_of_all_matrixes / all_events_dict[row.EventId])
+                features_numpy = np.array(features.values)
+                if np.any(window_labels == "Malicious"):
+                    labels.append(1)
+                else:
+                    labels.append(0)
+                
+                x[i] = features_numpy
+                bar()
         labels = np.array(labels)
         x = x.reshape(x.shape[0], 1, x.shape[1], x.shape[2])
         return x, labels
@@ -101,15 +105,16 @@ class K8sPreprocessing(Preprocessing):
     def prepare_logs(self, df, fitted_vectorizer):
         pool = multiprocessing.Pool()
         start_time = time.perf_counter()
-        processes = [pool.apply_async(self.parse_row, args=(row, fitted_vectorizer)) for _, row in df.iterrows()]
-        result = [p.get() for p in processes]
+        with alive_bar(1, spinner='fishes', length=5, spinner_length=60, title="Preprocessing text logs...") as bar:
+            processes = [pool.apply_async(self.parse_row, args=(row, fitted_vectorizer)) for _, row in df.iterrows()]
+            result = [p.get() for p in processes]
         finish_time = time.perf_counter()
         print(f"Columns extracted in {finish_time - start_time} seconds")
         df = pd.DataFrame(result, columns=['size [B]', 'time [ms]', 'url_malicious_score', 'label'])
         print(df)
         return df
 
-    def parse__row(self, row, fitted_vectorizer):
+    def parse_row(self, row, fitted_vectorizer):
         size = 0
         time = 0
         label = 'Normal'
@@ -121,7 +126,7 @@ class K8sPreprocessing(Preprocessing):
             if "path" in paramether:
                 url = re.search(r'path\": "(.*)"', paramether).groups()[0]
                 if url:
-                    tfidf_vectorizer_vectors = fitted_vectorizer.transform([url])
+                    tfidf_vectorizer_vectors = fitted_vectorizer.fitted_vectorizer.transform([url])
                     t = sorted([float(x) for x in tfidf_vectorizer_vectors.T.todense()], reverse=True)[:10]
                     t = [1 / x for x in t if x != 0]
                     score = sum(t)
@@ -159,7 +164,7 @@ class NsmcPreprocessing(Preprocessing):
                 url = re.search(r'\[(.*)\]', url).groups()[0]
                 url = parse_qs(url)[''][0]
                 if url:
-                    tfidf_vectorizer_vectors = fitted_vectorizer.transform([url])
+                    tfidf_vectorizer_vectors = fitted_vectorizer.fitted_vectorizer.transform([url])
                     t = sorted([float(x) for x in tfidf_vectorizer_vectors.T.todense()], reverse=True)[:10]
                     t = [1 / x for x in t if x != 0]
                     score = sum(t)

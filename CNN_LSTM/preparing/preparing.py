@@ -8,14 +8,20 @@ from torch.utils.data import DataLoader
 import pandas as pd
 
 
-
 class Preparing:
-    preprocessing = None
 
     def __init__(self, config):
         self.config = config
+        if self.config.log_type == 'nsmc':
+            self.preprocessing = NsmcPreprocessing(self.config)
+        elif self.config.log_type == 'k8s':
+            self.preprocessing = K8sPreprocessing(self.config)
+        else:
+            raise Exception('Wrong log type')
 
     def prepare_raw_nsmc_logs_for_parsing(self):
+        # Raw nsmc logs are in json format so we need to transform them to csv
+
         prepare_nsmc_logs = PrepareNSMCLogs(self.config)
         df = prepare_nsmc_logs.prepare_raw_nsmc_data()
         prepare_nsmc_logs.save_prepared_data(df)
@@ -25,16 +31,9 @@ class Preparing:
         return model
 
     def preprocess_data(self):
-        fitted_urls_vectorizer = UrlTFIDF(url='./malicious_data_patterns/malicious_urls')
+        fitted_urls_vectorizer = UrlTFIDF()
         if not fitted_urls_vectorizer:
             raise Exception('No fitted vectorizer')
-
-        if self.config.log_type == 'nsmc':
-            self.preprocessing = NsmcPreprocessing(self.config)
-        elif self.config.log_type == 'k8s':
-            self.preprocessing = K8sPreprocessing(self.config)
-        else:
-            raise Exception('No such log type')
         df = self.preprocessing.prepare_logs_dataframe()
         df = self.preprocessing.prepare_logs(df, fitted_urls_vectorizer)
         df.to_csv(self.config.prepared_data, index=False)

@@ -1,19 +1,12 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
-from evaluation.metrics import test_model
-from system_log_parser.logs_parser import depth, st, regex
-from system_log_parser.Drain import Drain
+from evaluation.metrics import TestProcessor
+from system_log_parser.logs_parser import Parser
 from preparing.prepare_model import train_model
 from preparing.preparing import Preparing
 from settings import *
 from dataclasses import dataclass
-
-torch.manual_seed(RANDOM_SEED)
-if torch.cuda.is_available():
-    DEVICE = "cuda:0"
-else:
-    DEVICE = "cpu"
 pd.options.mode.chained_assignment = None
 
 
@@ -32,10 +25,10 @@ class Config:
     num_lstm_directions: int = 1
     malicious_treshold: float = 1.25
     raw_logs: bool = False
-    parse_logs: bool = True
-    prepare_dataframe: bool = True
+    parse_logs: bool = False
+    prepare_dataframe: bool = False
     prepare_nsmc_logs_for_parsing: bool = False
-    log_type: str = "nsmc"
+    log_type: str = "k8s"
     raw_logs_dir: str = "data/logs_raw/"
     prepared_logs_dir: str = "data/logs_prepared/"
     parsed_logs_dir: str = "data/logs_parsed/"
@@ -51,14 +44,19 @@ def main() -> None:
     config = Config(filename="k8s-dashboard-gk-keycloa.log")
     preparing = Preparing(config)
 
+    torch.manual_seed(config.random_seed)
+    if torch.cuda.is_available():
+        DEVICE = "cuda:0"
+    else:
+        DEVICE = "cpu"
+    
+
     if config.prepare_nsmc_logs_for_parsing:
         preparing.prepare_raw_nsmc_logs_for_parsing()
 
     if config.parse_logs:
-        parser = Drain.LogParser(
-            LOG_FORMAT, indir=config.raw_logs_dir, outdir=config.parsed_logs_dir, depth=depth, st=st, rex=regex
-        )
-        parser.parse(config.filename)
+        parser = Parser(config)
+        parser.parse_and_save_results()
 
     if config.prepare_dataframe:
         logs_prepared_df = preparing.preprocess_data()
@@ -78,9 +76,11 @@ def main() -> None:
     model.to(DEVICE)
     train_loader, test_loader = preparing.get_data_loaders(train_data, test_data, train_labels, test_labels)
 
-    model = train_model(model, train_loader, DEVICE)
+    model = train_model(model, train_loader, DEVICE, config)
 
-    test_model(test_loader, train_loader, model, DEVICE)
+
+    test_processor = TestProcessor(config)
+    test_processor.test_model(test_loader, train_loader, model, DEVICE)
     torch.save(model.state_dict(), 'model.pth')
 
 

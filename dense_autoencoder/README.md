@@ -7,7 +7,7 @@ Install all Python libraries listed in the dense_autoencoder/requirements.txt fi
 ### Processed data fromat
 The script takes files with .csv format, with headers and comma separated data. The label column should be named 'Label', where 1 = anomaly, 0 = no anomaly. E.g.:
 ```
-EventSequence,Label
+ColumnName,Label
 191,0
 203,1
 199,0

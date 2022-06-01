@@ -5,7 +5,7 @@ Simple implementation of Autoencoder with Dense layers for anomaly detection.
 Install all Python libraries listed in the dense_autoencoder/requirements.txt file.
 
 ### Processed data fromat
-The script takes as input files with preprocessed data in .csv format, with headers and comma separated data. The label column should be named 'Label', where 1 = anomaly, 0 = no anomaly. E.g.:
+The script takes as input files with preprocessed data in .csv format, with headers and comma separated data. The label column should be named 'Label', where 1 = anomaly, 0 = no anomaly. An example .csv input file:
 ```
 ColumnName,Label
 191,0

@@ -78,5 +78,9 @@ Here are the steps:
 5. We train the model.
 6. We test the model and display confusion matrix.
 
-###TBC
+###Important URLs
+
+1. Web attacks generator https://github.com/Rovlet/LogsGenerator
+2. First approach to detect web attacks using CNN https://github.com/Rovlet/CNN_anomaly_detection
+
 
